@@ -22,6 +22,28 @@ class MessageManager {
           })
       });
   }
+  
+  report(obj) {
+    console.log("Report called!");
+    return new Promise((resolve, reject) => {
+      console.dir(obj);
+      Messages.findOne({ _id: obj.thread_id, board: obj.board }, {} , {new: true}, function (err, doc){
+        if (err) { reject(process.env.NODE_ENV == "test" ? err: "Error updating message"); }
+        if (!doc) { reject(process.env.NODE_ENV == "test" ? err: "Cannot find message to update"); }
+        else {
+          doc.reported = true;
+          doc.save(function(err, message){
+            if (err) { reject(process.env.NODE_ENV == "test" ? err: "Error updating message"); }
+            if (message) { 
+              console.log("We got a message on save");
+              console.dir(message);
+              resolve(message); 
+            }
+          });
+        }
+      }); 
+    });
+  }
 }
 
 module.exports = MessageManager;

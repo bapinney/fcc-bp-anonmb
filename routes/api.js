@@ -46,7 +46,12 @@ module.exports = function (app) {
       res.status(500).json({issueCreated: false, status:"Error creating message."}) });
   })
   .put(function(req, res) { // Put to api/threads/board is a report on that thread
-    
+    var mm = new MessageManager();
+    console.log("PUT called!");
+    console.dir(req);
+    mm.report(req.body)
+      .catch(function(err) { res.send("error: " + err); })
+      .then(function(doc) { res.json(doc);})
   }); 
     
   app.route('/api/replies/:board');
