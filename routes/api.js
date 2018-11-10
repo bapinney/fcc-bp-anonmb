@@ -15,7 +15,18 @@ module.exports = function (app) {
   
   app.route('/api/threads/:board')
   .get(function(req, res) {
-    res.send("get board");
+    
+    var mm = new MessageManager();
+    mm.getMessages(req.params.board)
+    .then(function(docs) {
+      console.log("At thead then");
+      console.dir(docs);
+      res.json(docs);
+    })
+    .catch(function (err) {
+      res.json(err);
+    });
+    
   })
   .post(function(req, res) {
     console.dir(req);
@@ -50,11 +61,25 @@ module.exports = function (app) {
     console.log("PUT called!");
     console.dir(req);
     mm.report(req.body)
-      .catch(function(err) { res.send("error: " + err); })
-      .then(function(doc) { res.json(doc);})
+    .then(function(doc) { res.send("Message reported"); return true;})
+    .catch(function(err) { 
+      res.status(500).send("error: " + err); 
+      return false; 
+    })
   }); 
     
-  app.route('/api/replies/:board');
+  app.route('/api/replies/:board')
+  .post(function(req, res) {
+    var mm = new MessageManager();
+    console.dir(req);
+    mm.reply(req.body)
+    .then(function(doc) {
+      res.json(doc);
+    })
+    .catch(function(err) {
+      res.status(500).json(err);
+    });
+  });
 
 };
 

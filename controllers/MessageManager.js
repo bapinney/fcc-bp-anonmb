@@ -23,6 +23,34 @@ class MessageManager {
       });
   }
   
+  getMessages(board) {
+    return new Promise((resolve, reject) => {
+      console.log("getMessages called");
+      Messages.find({board: board}, function(err, docs) {
+        if (err) {
+          reject(err);
+        }
+        if (docs) {
+          console.log("Got messages");
+          console.dir(docs);
+          resolve(docs);
+        }
+      });
+    });
+  }
+  
+  reply(obj) {
+    console.log("Reply called!");
+    return new Promise((resolve, reject) => {
+      console.dir(obj);
+      Messages.findOneAndUpdate({ _id: obj.thread_id, board: obj.board }, { $push: { replies: {text: obj.text, delete_password: obj.delete_password}}}, {new: true} ,function(err, doc) {
+        if (err) { reject("Error replying to thread");}
+        if (!doc) { reject("Cannot find thread to reply to");}
+        resolve(doc);
+      })
+    });
+  }
+  
   report(obj) {
     console.log("Report called!");
     return new Promise((resolve, reject) => {
