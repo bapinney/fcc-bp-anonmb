@@ -44,6 +44,9 @@ module.exports = function (app) {
       console.log("Error adding message");
       console.dir(error);
       res.status(500).json({issueCreated: false, status:"Error creating message."}) });
+  })
+  .put(function(req, res) { // Put to api/threads/board is a report on that thread
+    
   }); 
     
   app.route('/api/replies/:board');
