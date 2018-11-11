@@ -15,12 +15,19 @@ class MessageManager {
       if (!obj.text) reject("Message body is empty");
       var message = new Messages(obj);
       message.save().then(doc => {
+        console.log("resolving am promise");
         resolve(doc);
       }).catch(err => {
             console.error(err);
             reject(err);          
           })
       });
+  }
+  
+  bumpThread(board) {
+    return new Promise((resolve, reject) => {
+      Messages.update({board: board})
+    })
   }
   
   getMessages(board) {
@@ -42,9 +49,13 @@ class MessageManager {
   
   reply(obj) {
     console.log("Reply called!");
+    console.dir(obj);
     return new Promise((resolve, reject) => {
-      console.dir(obj);
-      Messages.findOneAndUpdate({ _id: obj.thread_id, board: obj.board }, { $push: { replies: {text: obj.text, delete_password: obj.delete_password}}}, {new: true} ,function(err, doc) {
+      
+      Messages.findOneAndUpdate({ _id: obj.thread_id, board: obj.board }, { 
+        $push: { replies: {text: obj.text, delete_password: obj.delete_password}},
+        $set:  { bumped_on: Date.now()}
+        }, {new: true} ,function(err, doc) {
         if (err) { reject("Error replying to thread");}
         if (!doc) { reject("Cannot find thread to reply to");}
         resolve(doc);

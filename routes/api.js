@@ -34,7 +34,6 @@ module.exports = function (app) {
     console.dir(req);
 //    var message = new Message(req.body);
     console.log("Api reply post");
-    res.json(req.body);
     var mm = new MessageManager();
     mm.addMessage({
       /*project: req.params.project,
@@ -54,7 +53,9 @@ module.exports = function (app) {
       text: req.body.text,
       deletePassword: req.body.delete_password
     })
-    .then(function(result) { res.json({messageCreated: true, result: result}) }, function (error) { 
+    .then(function(result) { 
+      res.redirect('/b/' + req.body.board);
+    }, function (error) { 
       console.log("Error adding message");
       console.dir(error);
       res.status(500).json({messageCreated: false, status:"Error creating message."}) });
@@ -83,10 +84,12 @@ module.exports = function (app) {
   app.route('/api/replies/:board')
   .post(function(req, res) {
     var mm = new MessageManager();
-    console.dir(req);
-    mm.reply(req.body)
+    console.dir(req.body);
+    console.dir(req.params);
+    var replyParams = Object.assign({}, req.body, req.params);
+    mm.reply(replyParams)
     .then(function(doc) {
-      res.json(doc);
+      res.redirect('/b/' + req.params.board);
     })
     .catch(function(err) {
       res.status(500).json(err);
