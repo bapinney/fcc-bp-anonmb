@@ -15,6 +15,8 @@ module.exports = function (app) {
   
   app.route('/api/threads/:board')
   .get(function(req, res) {
+    console.log("at get999");
+    console.dir(req);
     
     var mm = new MessageManager();
     mm.getMessages(req.params.board)
@@ -31,7 +33,8 @@ module.exports = function (app) {
   .post(function(req, res) {
     console.dir(req);
 //    var message = new Message(req.body);
-//    res.json(req.body);
+    console.log("Api reply post");
+    res.json(req.body);
     var mm = new MessageManager();
     mm.addMessage({
       /*project: req.params.project,
@@ -51,10 +54,10 @@ module.exports = function (app) {
       text: req.body.text,
       deletePassword: req.body.delete_password
     })
-    .then(function(result) { res.json({issueCreated: true, result: result}) }, function (error) { 
+    .then(function(result) { res.json({messageCreated: true, result: result}) }, function (error) { 
       console.log("Error adding message");
       console.dir(error);
-      res.status(500).json({issueCreated: false, status:"Error creating message."}) });
+      res.status(500).json({messageCreated: false, status:"Error creating message."}) });
   })
   .put(function(req, res) { // Put to api/threads/board is a report on that thread
     var mm = new MessageManager();

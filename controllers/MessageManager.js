@@ -26,6 +26,7 @@ class MessageManager {
   getMessages(board) {
     return new Promise((resolve, reject) => {
       console.log("getMessages called");
+      console.dir(board);
       Messages.find({board: board}, function(err, docs) {
         if (err) {
           reject(err);
@@ -105,10 +106,8 @@ class MessageManager {
           });
         }
         else {
-          console.log("We shouldn't ve here");
+          console.log("We shouldn't be here");
         }
-        
-        
       });
     });
   }
