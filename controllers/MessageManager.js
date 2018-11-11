@@ -11,7 +11,7 @@ class MessageManager {
       
       console.log("addMessage called.");
       console.dir(obj);
-      if (!obj.board) reject("Created By field is required");
+      if (!obj.board) reject("Board field is required");
       if (!obj.text) reject("Message body is empty");
       var message = new Messages(obj);
       message.save().then(doc => {
@@ -59,8 +59,12 @@ class MessageManager {
   
   delete(obj) {
     console.log("Delete called!");
+    console.dir(obj);
     return new Promise((resolve, reject) => {
       Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+        console.log("mf1 callback");
+        console.dir(err);
+        console.dir(doc._doc); //Check password is correct
         if (doc) { 
           doc.remove(function(err) {
             if (err) { reject(err); }

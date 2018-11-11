@@ -49,12 +49,14 @@ module.exports = function (app) {
   text: { type: String, required: true },
   deletePassword: {type: String, default:''},
   replies: { type: Array, default:[], required: true },*/
-      board: req.body.board,
+      board: req.params.board,
       text: req.body.text,
       deletePassword: req.body.delete_password
     })
     .then(function(result) { 
-      res.redirect('/b/' + req.body.board);
+      console.log("then result");
+      console.dir(result);
+      res.redirect('/b/' + req.params.board);
     }, function (error) { 
       console.log("Error adding message");
       console.dir(error);
@@ -74,7 +76,8 @@ module.exports = function (app) {
   .delete(function(req, res) {
     var mm = new MessageManager();
     console.log("Delete called");
-    mm.delete(req.body)
+    var deleteParams = Object.assign({}, req.body, req.params);
+    mm.delete(deleteParams)
     .then(function(doc) { res.send("Thread Deleted"); return true;})
     .catch(function(err) {
       res.status(500).send("error: " + err);
