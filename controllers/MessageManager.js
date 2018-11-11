@@ -24,12 +24,6 @@ class MessageManager {
       });
   }
   
-  bumpThread(board) {
-    return new Promise((resolve, reject) => {
-      Messages.update({board: board})
-    })
-  }
-  
   getMessages(board) {
     return new Promise((resolve, reject) => {
       console.log("getMessages called");
