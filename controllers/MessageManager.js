@@ -51,6 +51,20 @@ class MessageManager {
     });
   }
   
+  delete(obj) {
+    console.log("Delete called!");
+    return new Promise((resolve, reject) => {
+      Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+        if (doc) { 
+          doc.remove(function(err) {
+            if (err) { reject(err); }
+            resolve("Success");
+          });
+        }
+      });
+    });
+  }
+  
   report(obj) {
     console.log("Report called!");
     return new Promise((resolve, reject) => {

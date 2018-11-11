@@ -66,7 +66,16 @@ module.exports = function (app) {
       res.status(500).send("error: " + err); 
       return false; 
     })
-  }); 
+  })
+  .delete(function(req, res) {
+    var mm = new MessageManager();
+    console.log("Delete called");
+    mm.delete(req.body)
+    .then(function(doc) { res.send("Thread Deleted"); return true;})
+    .catch(function(err) {
+      res.status(500).send("error: " + err);
+    });
+  });
     
   app.route('/api/replies/:board')
   .post(function(req, res) {
