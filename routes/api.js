@@ -88,6 +88,30 @@ module.exports = function (app) {
     .catch(function(err) {
       res.status(500).json(err);
     });
+  })
+  .put(function(req, res) {
+    var mm = new MessageManager();
+    console.dir(req);
+    mm.reportReply(req.body)
+    .then(function(doc) {
+      res.json(doc);
+    })
+    .catch(function(err) {
+      res.status(500).json(err);
+    });
+  })
+  .delete(function(req, res) {
+    var mm = new MessageManager();
+    console.log("Delete reply");
+    console.dir(req);
+    mm.deleteReply(req.body)
+    .then(function(result) {
+      res.json(result);
+    })
+    .catch(function(err) {
+      res.status(500).json(err);
+    });
+    //mm.delete()
   });
 
 };

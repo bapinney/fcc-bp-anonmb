@@ -65,11 +65,59 @@ class MessageManager {
     });
   }
   
+  deleteReply(obj) {
+    console.log("Delete thread called!");
+    console.dir(obj);
+    return new Promise((resolve, reject) => {
+      Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+        if (doc) { 
+          /*(doc.remove(function(err) {
+            if (err) { reject(err); }
+            resolve("Success");
+          });( */
+          var subdoc = doc.replies.id(obj.reply_id);
+          console.log("doc found");
+          console.dir(subdoc);
+          var result = subdoc.remove();
+          doc.save(function (err) {
+            if (err) reject(err);
+            resolve('Reply removed.');
+          });
+          
+        }
+      });
+    });
+  }
+  
+  reportReply(obj) {
+    console.log("Report reply called!")
+    return new Promise((resolve, reject) => {
+      var msgsQ = { _id: ObjectId(obj.thread_id), board: obj.board};
+      console.dir(msgsQ);
+      Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+        if (err) { reject(err) }
+        if (doc) { 
+          var subdoc = doc.replies.id(obj.reply_id);
+          subdoc.reported = true;
+          doc.save(function (err) {
+            if (err) reject(err);
+            resolve("Reply reported");
+          });
+        }
+        else {
+          console.log("We shouldn't ve here");
+        }
+        
+        
+      });
+    });
+  }
+  
   report(obj) {
     console.log("Report called!");
     return new Promise((resolve, reject) => {
       console.dir(obj);
-      Messages.findOne({ _id: obj.thread_id, board: obj.board }, {} , {new: true}, function (err, doc){
+      Messages.findOne({ _id: ObjectId(obj.thread_id), board: obj.board }, {} , {new: true}, function (err, doc){
         if (err) { reject(process.env.NODE_ENV == "test" ? err: "Error updating message"); }
         if (!doc) { reject(process.env.NODE_ENV == "test" ? err: "Cannot find message to update"); }
         else {
