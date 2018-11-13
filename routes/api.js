@@ -51,12 +51,12 @@ module.exports = function (app) {
   replies: { type: Array, default:[], required: true },*/
       board: req.params.board,
       text: req.body.text,
-      deletePassword: req.body.delete_password
+      delete_password: req.body.delete_password
     })
     .then(function(result) { 
       console.log("then result");
       console.dir(result);
-      res.redirect('/b/' + req.params.board);
+      res.json(result);
     }, function (error) { 
       console.log("Error adding message");
       console.dir(error);
@@ -67,7 +67,7 @@ module.exports = function (app) {
     console.log("PUT called!");
     console.dir(req);
     mm.report(req.body)
-    .then(function(doc) { res.send("Message reported"); return true;})
+    .then(function(doc) { res.json(doc._doc); return true;})
     .catch(function(err) { 
       res.status(500).send("error: " + err); 
       return false; 
@@ -78,9 +78,9 @@ module.exports = function (app) {
     console.log("Delete called");
     var deleteParams = Object.assign({}, req.body, req.params);
     mm.delete(deleteParams)
-    .then(function(doc) { res.send("Thread Deleted"); return true;})
+    .then(function(doc) { res.json({deleteStatus: 'success'}); return true;})
     .catch(function(err) {
-      res.status(500).send("error: " + err);
+      res.status(500).json({deleteStatus: 'fail', error:err});
     });
   });
     
@@ -92,7 +92,8 @@ module.exports = function (app) {
     var replyParams = Object.assign({}, req.body, req.params);
     mm.reply(replyParams)
     .then(function(doc) {
-      res.redirect('/b/' + req.params.board);
+      res.json(doc._doc);
+
     })
     .catch(function(err) {
       res.status(500).json(err);
@@ -118,6 +119,8 @@ module.exports = function (app) {
       res.json(result);
     })
     .catch(function(err) {
+      console.error("Error while deleting");
+      console.dir(err);
       res.status(500).json(err);
     });
     //mm.delete()

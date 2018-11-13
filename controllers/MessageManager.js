@@ -14,21 +14,22 @@ class MessageManager {
       if (!obj.board) reject("Board field is required");
       if (!obj.text) reject("Message body is empty");
       var message = new Messages(obj);
-      message.save().then(doc => {
-        console.log("resolving am promise");
-        resolve(doc);
-      }).catch(err => {
-            console.error(err);
-            reject(err);          
-          })
-      });
-  }
+      message.save().then(function(doc) {
+        var retObj = doc;
+        resolve(retObj);
+      })
+      .catch(function(err) {
+        console.error(err);
+        reject(err);          
+      })
+    });
+  } 
   
   getMessages(board) {
     return new Promise((resolve, reject) => {
       console.log("getMessages called");
       console.dir(board);
-      Messages.find({board: board}, function(err, docs) {
+      Messages.find({board: board}).sort({bumped_on: -1}).limit(10).exec(function(err, docs) {
         if (err) {
           reject(err);
         }
@@ -47,9 +48,11 @@ class MessageManager {
     return new Promise((resolve, reject) => {
       
       Messages.findOneAndUpdate({ _id: obj.thread_id, board: obj.board }, { 
-        $push: { replies: {text: obj.text, delete_password: obj.delete_password}},
+        $push: { replies: {
+          $each: [{text: obj.text, delete_password: obj.delete_password}],
+          $sort: {bumped_on: -1},
         $set:  { bumped_on: Date.now()}
-        }, {new: true} ,function(err, doc) {
+        }}}, {new: true} ,function(err, doc) {
         if (err) { reject("Error replying to thread");}
         if (!doc) { reject("Cannot find thread to reply to");}
         resolve(doc);
@@ -61,6 +64,9 @@ class MessageManager {
     console.log("Delete called!");
     console.dir(obj);
     return new Promise((resolve, reject) => {
+      if (!obj.hasOwnProperty('password')) {
+        reject("Password required to delete");
+      }
       Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
         console.log("mf1 callback");
         console.dir(err);
