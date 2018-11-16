@@ -22,7 +22,6 @@ module.exports = function (app) {
     mm.getMessages(req.params.board)
     .then(function(docs) {
       console.log("At thead then");
-      console.dir(docs);
       res.json(docs);
     })
     .catch(function (err) {
@@ -31,7 +30,7 @@ module.exports = function (app) {
     
   })
   .post(function(req, res) {
-    console.dir(req);
+    
 //    var message = new Message(req.body);
     console.log("Api reply post");
     var mm = new MessageManager();
@@ -55,7 +54,7 @@ module.exports = function (app) {
     })
     .then(function(result) { 
       console.log("then result");
-      console.dir(result);
+      //console.dir(result);
       res.json(result);
     }, function (error) { 
       console.log("Error adding message");
@@ -65,7 +64,7 @@ module.exports = function (app) {
   .put(function(req, res) { // Put to api/threads/board is a report on that thread
     var mm = new MessageManager();
     console.log("PUT called!");
-    console.dir(req);
+    //console.dir(req);
     mm.report(req.body)
     .then(function(doc) { res.json(doc._doc); return true;})
     .catch(function(err) { 
@@ -85,10 +84,20 @@ module.exports = function (app) {
   });
     
   app.route('/api/replies/:board')
+  .get(function(req, res) {
+    var mm = new MessageManager();
+    mm.getReplies(req.params.board)
+    .then(function(docs) {
+      res.json(docs);
+    })
+    .catch(function(err) {
+      res.status(500).json({error: err});
+    });
+  })
   .post(function(req, res) {
     var mm = new MessageManager();
-    console.dir(req.body);
-    console.dir(req.params);
+    console.log("At post reply");
+    //console.dir(req.params);
     var replyParams = Object.assign({}, req.body, req.params);
     mm.reply(replyParams)
     .then(function(doc) {
@@ -101,7 +110,6 @@ module.exports = function (app) {
   })
   .put(function(req, res) {
     var mm = new MessageManager();
-    console.dir(req);
     mm.reportReply(req.body)
     .then(function(doc) {
       res.json(doc);
@@ -112,8 +120,6 @@ module.exports = function (app) {
   })
   .delete(function(req, res) {
     var mm = new MessageManager();
-    console.log("Delete reply");
-    console.dir(req);
     mm.deleteReply(req.body)
     .then(function(result) {
       res.json(result);
