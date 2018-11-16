@@ -30,7 +30,7 @@ suite('Functional Tests', function() {
           .send({
             board: "testboard",
             text: "testtext",
-            delete_password: 313138
+            delete_password: 313139
           })
           .end(function(err, res) {
             assert.isNull(err, "POST to board did not result in an error");
@@ -105,11 +105,11 @@ suite('Functional Tests', function() {
           .send({
             board: 'testboard',
             thread_id: threadID2Use,
-            delete_password: 313138
+            delete_password: 313139
           })
           .end(function(err, res) {
             console.log("delete success"); 
-            assert.isNotNull(null, "There should be an error!");
+            assert.isNotNull(err, "There should be an error!");
             done();
           });
           
@@ -122,20 +122,13 @@ suite('Functional Tests', function() {
   
   suite('API ROUTING FOR /api/replies/:board', function() {
     var newerThreadID;
-    
-    suite('GET', function() {
-      console.log("GET REPLIES1!");
-      test("GET replies", function(done) {
-        console.log("get replies test");  
-        assert.isTrue(true);
-        done();
-      });
-    });
+    var replyCheckTS;
+    var replyDeleteID;
     
     suite('POST', function() {
       test("POST a reply", function(done) {  //We'll need a new thread ID since we deleted the last one at this point....
         console.log("POST a reply test running...");
-        done();
+        
         chai.request(server)
           .post('/api/threads/testboard')
           .send({
@@ -143,47 +136,74 @@ suite('Functional Tests', function() {
             text: "reply to me",
             delete_password: 313138
           })
-        .end(function(err, res) {
-          assert.isNull(err, "There should be no err after post");
-          assert.isNotNull(res.body._id, "We should have a thread id");
-          newerThreadID = res.body._id;
-          done();
-//          request2();
-        });
-        var request2 = function() {
-          chai.request(server)
-          .post('/api/replies/testboard')
-          .send({
-            thread_id: newerThreadID,
-            text: "I think I will",
-            delete_password: 313138
-          })
-          .end(function(err, res) {
-            console.log("At POST reply then");  
-            assert.typeOf(res.body.replies, "array", "Replies is an array");
-            assert.equal(res.body.replies[0].text, "I think I will");
-            done();
+          .then(function(res) {
+            newerThreadID = res.body._id;
+            chai.request(server)
+            .post('/api/replies/testboard')
+            .send({
+              thread_id: newerThreadID,
+              text: "I think I will",
+              delete_password: 313138 
+            })
+            .end(function(err, res) {
+              console.log("At POST 2 reply then");  
+              assert.typeOf(res.body.replies, "array", "Replies is an array");
+              assert.equal(res.body.replies[0].text, "I think I will");
+              replyCheckTS = res.body.replies[0].created_on;
+              done();
+            });
           });
-        };
+        });
+    });
+    
+    suite('GET', function() {
+      console.log("GET REPLIES1!");
+      test("GET replies", function(done) {
+        chai.request(server)
+        .get('/api/replies/testboard')
+        .then(function(res) {
+          assert.equal(res.body[0].replies[0].created_on, replyCheckTS, "We should see the reply we just made");
+          console.log("DIRing reply");
+          replyDeleteID = res.body[0].replies[0]._id;
+          done();
+        });
+        
       });
     });
     
-    suite("pls work", function() {
-      test('pls1', function(done) {
-        console.log("foo");
-      })
-    });
-     
     suite('PUT', function() { 
-      test("PUT should be last", function(done) {
-        assert.equal(true, "i hope so!");
-        console.log("me too!");
-        done();
+      test("PUT reply", function(done) {
+        console.log("Here is what we are putting");
+        console.dir({ reply_id: replyDeleteID, thread_id: newerThreadID });
+        chai.request(server)
+        .put('/api/replies/testboard')
+        .send({ reply_id: replyDeleteID, thread_id: newerThreadID })
+        .then(function(res) {
+          chai.request(server)
+          .get('/api/replies/testboard')
+          .then(function(res) {
+            assert.isTrue(res.body[0].replies[0].reported, "We should see the reply we just reported");
+            done();
+          });
+        });
+        
       });
     });
     
     suite('DELETE', function() {
-      
+      test("DELETING reply", function(done) {
+        console.log("Here is what we are deleting");
+        console.dir({ reply_id: replyDeleteID, thread_id: newerThreadID });
+        chai.request(server)
+        .delete('/api/replies/testboard')
+        .send({ reply_id: replyDeleteID, thread_id: newerThreadID, delete_password: 31318})
+        .then(function(res) {
+          console.log("del result");
+          assert.equal(res.body.replyDeleted, true);
+          done();
+        });
+        
+      });
     }); 
   });
-}) 
+})

@@ -106,21 +106,20 @@ class MessageManager {
   }
   
   deleteReply(obj) {
-    console.log("Delete thread called!");
-    console.dir(obj);
+    console.log("Delete reply called!");
+    
     return new Promise((resolve, reject) => {
-      Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+      Messages.findOne({ _id: obj.thread_id}, function(err, doc) {
         if (doc) { 
           /*(doc.remove(function(err) {
             if (err) { reject(err); }
             resolve("Success");
           });( */
           var subdoc = doc.replies.id(obj.reply_id);
-          console.log("doc found");
-          console.dir(subdoc);
-          var result = subdoc.remove();
+          doc.replies.pull(subdoc);
           doc.save(function (err) {
             if (err) reject(err);
+            console.log("resolving reply remove");
             resolve('Reply removed.');
           });
           
@@ -131,13 +130,16 @@ class MessageManager {
   
   reportReply(obj) {
     console.log("Report reply called!")
+    console.dir(obj);
     return new Promise((resolve, reject) => {
-      var msgsQ = { _id: ObjectId(obj.thread_id), board: obj.board};
+      var msgsQ = { _id: ObjectId(obj.thread_id)};
       console.dir(msgsQ);
-      Messages.findOne({ _id: obj.thread_id, board: obj.board}, function(err, doc) {
+      Messages.findOne({ _id: obj.thread_id}, function(err, doc) {
         if (err) { reject(err) }
         if (doc) { 
           var subdoc = doc.replies.id(obj.reply_id);
+          console.log("here is subdoc");
+          console.dir(subdoc._doc);
           subdoc.reported = true;
           doc.save(function (err) {
             if (err) reject(err);

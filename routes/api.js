@@ -122,12 +122,12 @@ module.exports = function (app) {
     var mm = new MessageManager();
     mm.deleteReply(req.body)
     .then(function(result) {
-      res.json(result);
+      res.json({replyDeleted:true, result: result});
     })
     .catch(function(err) {
       console.error("Error while deleting");
       console.dir(err);
-      res.status(500).json(err);
+      res.status(500).json({replyDeleted:false, result:err});
     });
     //mm.delete()
   });
